@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{{ request.user }}  {{ request.user.online_wallet }}
+
+<div>
+    <a href="{% url 'logout' %}">Logout</a>
+</div>
+
+<div>
+    {% for obj in object_list %}
+    <div>
+       Наименование {{ obj.product_name }}
+        Описание {{ obj.product_description }}
+        Количество {{ obj.product_count }}
+        Цена {{ obj.product_price }}
+        {{ obj.image }}
+        <form method="post" action="{% url 'product-update' obj.pk %}">
+            {% csrf_token %}
+            <input type="submit" value="Update">
+        </form>
+    </div>
+    {% endfor %}
+</div>
+<form method="post" action="{% url 'product-create' %}">
+    {% csrf_token %}
+    {{ create_form }}
+    <input type="submit" value="Create">
+</form>
+{% endblock %}
+
