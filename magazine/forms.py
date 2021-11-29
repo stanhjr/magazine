@@ -22,11 +22,11 @@ class ProductCreateForm(ModelForm):
 class ProductBuyForm(ModelForm):
     class Meta:
         model = ObjectBuyProduct
-        fields = ('number_of_product', 'product_name', 'user')
+        fields = ('number_of_product', )
 
     def clean(self):
         cleaned_data = super().clean()
-        # Здесь будет  валидация
+
 
 
 

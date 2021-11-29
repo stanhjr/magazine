@@ -1,3 +1,5 @@
+import decimal
+
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import render
@@ -50,13 +52,19 @@ class ProductListBuyView(LoginRequiredMixin, ListView):
 class ProductBuyView(LoginRequiredMixin, CreateView):
     login_url = 'login/'
     http_method_names = ['post', ]
-
     form_class = ProductBuyForm
-    success_url = 'product.html'
+    success_url = '/product'
 
     def form_valid(self, form):
-        ...
-    # Здесь будет логика после валидации
+        obj = form.save(commit=False)
+        obj.user = self.request.user
+        number_of_product = int(self.request.POST.get('number_of_product'))
+        product_id = self.request.POST.get('product')
+        obj.product = Product.objects.get(id=product_id)
+        obj.user.online_wallet -= decimal.Decimal(float(obj.product.product_price)) * number_of_product
+        obj.product.product_count -= number_of_product
+        obj.save()
+        return super().form_valid(form=form)
 
 
 class Login(LoginView):

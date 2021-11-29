@@ -20,7 +20,7 @@ class Product(models.Model):
 
 class ObjectBuyProduct(models.Model):
     user = models.ForeignKey(MyUser, on_delete=models.DO_NOTHING, related_name='user')
-    product_name = models.ForeignKey(Product, on_delete=models.DO_NOTHING, related_name='object_product_name')
+    product = models.ForeignKey(Product, on_delete=models.DO_NOTHING, related_name='product')
     number_of_product = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -28,7 +28,7 @@ class ObjectBuyProduct(models.Model):
         ordering = ['-created_at', ]
 
     def __str__(self):
-        return f'{self.user}', {self.product_name}, {self.created_at}
+        return f'{self.user}', {self.product}, {self.created_at}
 
 
 class PurchaseReturn(models.Model):
