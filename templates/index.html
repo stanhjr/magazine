@@ -3,18 +3,30 @@
 {% block content %}
 {{ request.user }}  {{ request.user.online_wallet }}
 
-<div>
+<div class="login-link">
     <a href="{% url 'logout' %}">Logout</a>
 </div>
 
-<div>
+<div class="products">
     {% for obj in object_list %}
-    <div>
-       Наименование {{ obj.product_name }}
-        Описание {{ obj.product_description }}
-        Количество {{ obj.product_count }}
-        Цена {{ obj.product_price }}
-        {{ obj.image }}
+    <div class="product-item">
+        <div class="product-field">
+            <span class="product-field-name">Наименование</span>
+            <span class="product-field-description">{{ obj.product_name }}</span>
+        </div>
+        <div class="product-field">
+            <span class="product-field-name">Описание</span>
+            <span class="product-field-description">{{ obj.product_description }}</span>
+        </div>
+        <div class="product-field">
+            <span class="product-field-name">Количество</span>
+            <span class="product-field-description">{{ obj.product_count }}</span>
+        </div>
+        <div class="product-field">
+            <span class="product-field-name">Цена</span>
+            <span class="product-field-description">{{ obj.product_price }}</span>
+        </div>
+        <div>{{ obj.image }}</div>
         <form method="post" action="{% url 'product-update' obj.pk %}">
             {% csrf_token %}
             <input type="submit" value="Update">

@@ -101,11 +101,11 @@ class OrderListView(LoginRequiredMixin, ListView):
     extra_context = {'order_return_form': PurchaseReturnForm()}
 
 
-class OrderReturnListView(LoginRequiredMixin, ListView):
-    model = PurchaseReturn
-    template_name = 'product.html'
-    login_url = 'login/'
-    extra_context = {'order_return_form': PurchaseReturnForm()}
+# class OrderReturnListView(LoginRequiredMixin, ListView):
+#     model = PurchaseReturn
+#     template_name = 'product.html'
+#     login_url = 'login/'
+#     extra_context = {'order_return_form': PurchaseReturnForm()}
 
 
 # здесь в экстраконтенте две формы или что?
@@ -113,7 +113,7 @@ class OrderAdmin(LoginRequiredMixin, ListView):
     model = PurchaseReturn
     template_name = 'purchase-return.html'
     login_url = 'login/'
-    # extra_context = {'confirm_form': PurchaseReturnForm()}
+
 
 
 # Доделать форму без форм класс
@@ -146,11 +146,8 @@ class ReturnUserConfirm(LoginRequiredMixin, FormView):
         obj.user.online_wallet += decimal.Decimal(float(object_buy_product.product.product_price) * float(object_buy_product.number_of_product))
         obj.user.save()
         object_buy_product.product.save()
-
         obj_purchase_return.delete()
-
         object_buy_product.delete()
-
         return super().form_valid(form=form)
 
 
