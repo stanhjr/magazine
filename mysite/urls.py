@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from magazine.views import Login, Logout, Register, ProductCreateView, ProductDeleteView, ProductListView, \
     ProductUpdateView, ProductBuyView, ProductListBuyView, OrderReturnCreateView, OrderListView, OrderAdmin, \
-    ReturnUserConfirm
+    ReturnUserConfirm, ReturnUserDelete
 
 urlpatterns = [
     path('', ProductListView.as_view(), name='index'),
@@ -34,6 +34,7 @@ urlpatterns = [
     path('order/', OrderListView.as_view(), name='order'),
     path('order-admin/', OrderAdmin.as_view(), name='order-admin'),
     path('order-admin/confirm', ReturnUserConfirm.as_view(), name='order-return-confirm'),
+    path('order-admin/delete', ReturnUserDelete.as_view(), name='order-return-delete'),
 
 ]
 

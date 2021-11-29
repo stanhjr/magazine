@@ -15,14 +15,14 @@
         Время покупки {{ obj.created_at }}
         Цена {{ obj.product.product_price }}
         {{ obj.image }}
-
         <form method="post" action="{% url 'order-return' %}">
             {% csrf_token %}
             {{ order_return_form }}
             <input type="hidden" name="order" value={{ obj.pk }}>
             <input type="submit" value="OrderReturn">
-
         </form>
+
+
 
 
     </div>

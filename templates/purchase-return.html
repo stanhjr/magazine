@@ -24,6 +24,11 @@
             <input type="submit" value="Confirm">
         </form>
 
+        <form method="post" action="{% url 'order-return-delete' %}">
+            {% csrf_token %}
+            <input type="hidden" name="purchase_id" value={{ obj.pk }}>
+            <input type="submit" value="Delete">
+        </form>
     </div>
     {% endfor %}
 </div>

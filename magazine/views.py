@@ -1,19 +1,26 @@
 import decimal
 
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.shortcuts import render
+from django.http import HttpResponseRedirect, HttpResponse
+from django.shortcuts import redirect
 from django.views import View
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView, FormView
 from .forms import ProductCreateForm, SignUpForm, ProductBuyForm, PurchaseReturnForm
 from .models import Product, ObjectBuyProduct, PurchaseReturn
 
 
-class ProductListView(LoginRequiredMixin, ListView):
+class ProductListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Product
     template_name = 'index.html'
     login_url = 'login/'
     extra_context = {'create_form': ProductCreateForm()}
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        return redirect('login/')
 
 
 class ProductCreateView(PermissionRequiredMixin, CreateView):
@@ -69,6 +76,7 @@ class ProductBuyView(LoginRequiredMixin, CreateView):
         return super().form_valid(form=form)
 
 
+# Дописать валидацию отправки возврата !
 class OrderReturnCreateView(LoginRequiredMixin, CreateView):
     login_url = 'login/'
     http_method_names = ['post', ]
@@ -78,7 +86,9 @@ class OrderReturnCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         order_id = self.request.POST.get('order')
+
         obj.object_buy_product = ObjectBuyProduct.objects.get(id=order_id)
+
         obj.user = self.request.user
         obj.save()
         return super().form_valid(form=form)
@@ -106,12 +116,21 @@ class OrderAdmin(LoginRequiredMixin, ListView):
     # extra_context = {'confirm_form': PurchaseReturnForm()}
 
 
-class ReturnUserDelete(LoginRequiredMixin, DeleteView):
-    model = PurchaseReturn
-    success_url = '/'
+# Доделать форму без форм класс
+class ReturnUserDelete(LoginRequiredMixin, FormView):
+    form_class = PurchaseReturnForm
+    http_method_names = ['post', ]
+    success_url = '/order-admin'
+
+    def form_valid(self, form):
+        purchase_id = self.request.POST.get('purchase_id')
+        obj_purchase_return = PurchaseReturn.objects.get(id=purchase_id)
+        obj_purchase_return.delete()
+        return super().form_valid(form=form)
 
 
-class ReturnUserConfirm(LoginRequiredMixin, CreateView):
+# Доделать форму без форм класс
+class ReturnUserConfirm(LoginRequiredMixin, FormView):
     form_class = PurchaseReturnForm
     http_method_names = ['post', ]
     success_url = '/order-admin'
@@ -127,8 +146,11 @@ class ReturnUserConfirm(LoginRequiredMixin, CreateView):
         obj.user.online_wallet += decimal.Decimal(float(object_buy_product.product.product_price) * float(object_buy_product.number_of_product))
         obj.user.save()
         object_buy_product.product.save()
+
         obj_purchase_return.delete()
+
         object_buy_product.delete()
+
         return super().form_valid(form=form)
 
 
