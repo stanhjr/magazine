@@ -63,6 +63,8 @@ class ProductBuyView(LoginRequiredMixin, CreateView):
         obj.product = Product.objects.get(id=product_id)
         obj.user.online_wallet -= decimal.Decimal(float(obj.product.product_price)) * number_of_product
         obj.product.product_count -= number_of_product
+        obj.product.save()
+        obj.user.save()
         obj.save()
         return super().form_valid(form=form)
 
