@@ -2,7 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django.forms import ModelForm
 
-from magazine.models import Product, ObjectBuyProduct
+from magazine.models import Product, ObjectBuyProduct, PurchaseReturn
 
 from .models import MyUser
 
@@ -26,6 +26,17 @@ class ProductBuyForm(ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        # ...
+
+
+class PurchaseReturnForm(ModelForm):
+    class Meta:
+        model = PurchaseReturn
+        fields = ('proof_of_return', )
+
+
+
+
 
 
 

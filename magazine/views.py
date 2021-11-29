@@ -5,8 +5,8 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import render
 from django.views import View
 from django.views.generic import ListView, CreateView, DeleteView, UpdateView, FormView
-from .forms import ProductCreateForm, SignUpForm, ProductBuyForm
-from .models import Product, ObjectBuyProduct
+from .forms import ProductCreateForm, SignUpForm, ProductBuyForm, PurchaseReturnForm
+from .models import Product, ObjectBuyProduct, PurchaseReturn
 
 
 class ProductListView(LoginRequiredMixin, ListView):
@@ -67,6 +67,53 @@ class ProductBuyView(LoginRequiredMixin, CreateView):
         obj.user.save()
         obj.save()
         return super().form_valid(form=form)
+
+
+class OrderReturnCreateView(LoginRequiredMixin, CreateView):
+    login_url = 'login/'
+    http_method_names = ['post', ]
+    form_class = PurchaseReturnForm
+    success_url = '/order'
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        order_id = self.request.POST.get('order')
+        obj.object_buy_product = ObjectBuyProduct.objects.get(id=order_id)
+        obj.user = self.request.user
+        print(obj)
+        obj.save()
+        return super().form_valid(form=form)
+
+
+class OrderListView(LoginRequiredMixin, ListView):
+    model = ObjectBuyProduct
+    template_name = 'order.html'
+    login_url = 'login/'
+    extra_context = {'order_return_form': PurchaseReturnForm()}
+
+
+class OrderReturnListView(LoginRequiredMixin, ListView):
+    model = PurchaseReturn
+    template_name = 'product.html'
+    login_url = 'login/'
+    extra_context = {'order_return_form': PurchaseReturnForm()}
+
+
+# здесь в экстраконтенте две формы или что?
+class OrderUser(LoginRequiredMixin, ListView):
+    model = PurchaseReturn
+    template_name = 'purchase-return.html'
+    login_url = 'login/'
+    # extra_context = {'confirm_form': PurchaseConfirmForm()}
+
+
+
+
+
+
+
+
+
 
 
 class Login(LoginView):

@@ -27,9 +27,6 @@ class ObjectBuyProduct(models.Model):
     class Meta:
         ordering = ['-created_at', ]
 
-    def __str__(self):
-        return f'{self.user}', {self.product}, {self.created_at}
-
 
 class PurchaseReturn(models.Model):
     return_at = models.DateTimeField(auto_now_add=True)
