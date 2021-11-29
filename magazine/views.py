@@ -1,11 +1,15 @@
+import datetime
 import decimal
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import redirect
+from django.http import HttpResponseRedirect, HttpResponse, request
+from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.views import View
-from django.views.generic import ListView, CreateView, DeleteView, UpdateView, FormView
+from django.views.generic import ListView, CreateView, UpdateView, FormView
+
+from . import forms
 from .forms import ProductCreateForm, SignUpForm, ProductBuyForm, PurchaseReturnForm
 from .models import Product, ObjectBuyProduct, PurchaseReturn
 
@@ -35,11 +39,6 @@ class ProductCreateView(PermissionRequiredMixin, CreateView):
         obj.author = self.request.user
         obj.save()
         return super().form_valid(form=form)
-
-
-class ProductDeleteView(LoginRequiredMixin, DeleteView):
-    model = Product
-    success_url = '/'
 
 
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
@@ -86,8 +85,14 @@ class OrderReturnCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         obj = form.save(commit=False)
         order_id = self.request.POST.get('order')
-
         obj.object_buy_product = ObjectBuyProduct.objects.get(id=order_id)
+
+        d1 = obj.object_buy_product.created_at
+        d2 = timezone.now()
+
+        if abs(d2 - d1) < datetime.timedelta(seconds=180):
+            return render(request, 'order.html',
+                          {'message': 'Прошло более 180 секунд, вернуть нельзя'})
 
         obj.user = self.request.user
         obj.save()
@@ -113,7 +118,6 @@ class OrderAdmin(LoginRequiredMixin, ListView):
     model = PurchaseReturn
     template_name = 'purchase-return.html'
     login_url = 'login/'
-
 
 
 # Доделать форму без форм класс

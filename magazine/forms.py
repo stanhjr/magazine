@@ -25,14 +25,21 @@ class ProductBuyForm(ModelForm):
         fields = ('number_of_product', )
 
     def clean(self):
-        cleaned_data = super().clean()
-        # ...
+        # cleaned_data = super().clean()
+        # product_id = self.cleaned_data.get('age')
 
 
 class PurchaseReturnForm(ModelForm):
     class Meta:
         model = PurchaseReturn
         fields = ()
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+
+
+
 
 
 
