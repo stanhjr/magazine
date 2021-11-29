@@ -32,7 +32,8 @@ class ProductBuyForm(ModelForm):
 class PurchaseReturnForm(ModelForm):
     class Meta:
         model = PurchaseReturn
-        fields = ('proof_of_return', )
+        fields = ()
+
 
 
 

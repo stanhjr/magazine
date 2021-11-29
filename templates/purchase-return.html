@@ -9,6 +9,7 @@
 <div>
     {% for obj in object_list %}
     <div>
+
         Наименование {{ obj.object_buy_product.product.product_name }}
         Описание {{ obj.object_buy_product.product.product_description }}
         Количество {{ obj.object_buy_product.number_of_product }}
@@ -16,15 +17,12 @@
         Цена {{ obj.object_buy_product.product.product_price }}
         {{ obj.image }}
 
-        <form method="post" action="{% url 'order-return' %}">
+        <form method="post" action="{% url 'order-return-confirm' %}">
             {% csrf_token %}
-            {{ order_return_form }}
-            <input type="hidden" name="return_confirm" value={{ obj.pk }}>
+            <input type="hidden" name="return_id" value={{ obj.object_buy_product.pk }}>
+            <input type="hidden" name="purchase_id" value={{ obj.pk }}>
             <input type="submit" value="Confirm">
-
         </form>
-
-
 
     </div>
     {% endfor %}

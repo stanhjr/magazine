@@ -80,7 +80,6 @@ class OrderReturnCreateView(LoginRequiredMixin, CreateView):
         order_id = self.request.POST.get('order')
         obj.object_buy_product = ObjectBuyProduct.objects.get(id=order_id)
         obj.user = self.request.user
-        print(obj)
         obj.save()
         return super().form_valid(form=form)
 
@@ -100,20 +99,37 @@ class OrderReturnListView(LoginRequiredMixin, ListView):
 
 
 # здесь в экстраконтенте две формы или что?
-class OrderUser(LoginRequiredMixin, ListView):
+class OrderAdmin(LoginRequiredMixin, ListView):
     model = PurchaseReturn
     template_name = 'purchase-return.html'
     login_url = 'login/'
-    # extra_context = {'confirm_form': PurchaseConfirmForm()}
+    # extra_context = {'confirm_form': PurchaseReturnForm()}
 
 
+class ReturnUserDelete(LoginRequiredMixin, DeleteView):
+    model = PurchaseReturn
+    success_url = '/'
 
 
+class ReturnUserConfirm(LoginRequiredMixin, CreateView):
+    form_class = PurchaseReturnForm
+    http_method_names = ['post', ]
+    success_url = '/order-admin'
 
-
-
-
-
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        order_id = self.request.POST.get('return_id')
+        purchase_id = self.request.POST.get('purchase_id')
+        object_buy_product = ObjectBuyProduct.objects.get(id=order_id)
+        obj_purchase_return = PurchaseReturn.objects.get(id=purchase_id)
+        object_buy_product.product.product_count += int(object_buy_product.number_of_product)
+        obj.user = self.request.user
+        obj.user.online_wallet += decimal.Decimal(float(object_buy_product.product.product_price) * float(object_buy_product.number_of_product))
+        obj.user.save()
+        object_buy_product.product.save()
+        obj_purchase_return.delete()
+        object_buy_product.delete()
+        return super().form_valid(form=form)
 
 
 class Login(LoginView):

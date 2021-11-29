@@ -16,7 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from magazine.views import Login, Logout, Register, ProductCreateView, ProductDeleteView, ProductListView, \
-    ProductUpdateView, ProductBuyView, ProductListBuyView, OrderReturnCreateView, OrderListView, OrderUser
+    ProductUpdateView, ProductBuyView, ProductListBuyView, OrderReturnCreateView, OrderListView, OrderAdmin, \
+    ReturnUserConfirm
 
 urlpatterns = [
     path('', ProductListView.as_view(), name='index'),
@@ -31,8 +32,8 @@ urlpatterns = [
     path('product/', ProductListBuyView.as_view(), name='product'),
     path('order/return/', OrderReturnCreateView.as_view(), name='order-return'),
     path('order/', OrderListView.as_view(), name='order'),
-    path('order-admin/', OrderUser.as_view(), name='order-admin'),
-
+    path('order-admin/', OrderAdmin.as_view(), name='order-admin'),
+    path('order-admin/confirm', ReturnUserConfirm.as_view(), name='order-return-confirm'),
 
 ]
 

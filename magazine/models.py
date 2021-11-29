@@ -30,9 +30,6 @@ class ObjectBuyProduct(models.Model):
 
 class PurchaseReturn(models.Model):
     return_at = models.DateTimeField(auto_now_add=True)
-    proof_of_return = models.BooleanField(default=False)
     object_buy_product = models.OneToOneField(ObjectBuyProduct, on_delete=models.DO_NOTHING, related_name='purchase_return')
 
-    class Meta:
-        ordering = ['-return_at', ]
 
