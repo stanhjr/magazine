@@ -17,8 +17,10 @@
         <form method="post" action="{% url 'product-buy' %}">
             {% csrf_token %}
             {{ product_buy_form.number_of_product }}
+            <input type="hidden" name="product" value={{ obj.pk }}>
+
             <input type="submit" value="Buy">
-            <input type="hidden" value={{ obj }}>
+
         </form>
 
 

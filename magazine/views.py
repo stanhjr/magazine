@@ -1,7 +1,8 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import render
-from django.views.generic import ListView, CreateView, DeleteView, UpdateView
+from django.views import View
+from django.views.generic import ListView, CreateView, DeleteView, UpdateView, FormView
 from .forms import ProductCreateForm, SignUpForm, ProductBuyForm
 from .models import Product, ObjectBuyProduct
 
@@ -34,7 +35,7 @@ class ProductDeleteView(LoginRequiredMixin, DeleteView):
 
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
     model = Product
-    fields = ('product_name', 'product_description', 'product_count', 'image', 'number_of_product')
+    fields = ('product_name', 'product_description', 'product_count', 'image')
     template_name = 'update_form.html'
     success_url = '/'
 
@@ -48,26 +49,14 @@ class ProductListBuyView(LoginRequiredMixin, ListView):
 
 class ProductBuyView(LoginRequiredMixin, CreateView):
     login_url = 'login/'
-    http_method_names = ['post']
+    http_method_names = ['post', ]
+
     form_class = ProductBuyForm
-    success_url = '/'
+    success_url = 'product.html'
 
     def form_valid(self, form):
-        print(form)
-        obj = form.save(commit=False)
-        print(obj)
-        # product_count = int(obj.form_class.product_name.product_count)
-        # product_price = int(obj.form_class.product_name.product_price)
-        # product_need_buy = int(self.form_class.number_of_product)
-        # #
-        # # product_count = float(self.form_class.product_name.product_count)
-        # # product_price = float(self.form_class.product_name.product_price)
-        # # product_need_buy = float(self.form_class.number_of_product)
-        #
-        # self.request.user.online_wallet -= product_price * product_need_buy
-        # product_count -= product_need_buy
-        # obj.save()
-        # return super().form_valid(form=form)
+        ...
+    # Здесь будет логика после валидации
 
 
 class Login(LoginView):
