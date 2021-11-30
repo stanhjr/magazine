@@ -11,7 +11,7 @@ from .models import Product, ObjectBuyProduct, PurchaseReturn
 
 class ProductAdminListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Product
-    template_name = 'buy-product.html'
+    template_name = 'product.html'
     login_url = '/'
     extra_context = {'create_form': ProductCreateForm()}
 
@@ -75,6 +75,14 @@ class ProductBuyView(LoginRequiredMixin, CreateView):
         obj.user.save()
         obj.save()
         return super().form_valid(form=form)
+
+    def get_form_kwargs(self):
+        kw = super(ProductBuyView, self).get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def form_invalid(self, form):
+        return HttpResponseRedirect(reverse('/'))
 
 
 class OrderReturnCreateView(LoginRequiredMixin, CreateView):

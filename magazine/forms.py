@@ -23,12 +23,29 @@ class ProductCreateForm(forms.ModelForm):
 
 
 class ProductBuyForm(forms.ModelForm):
+    product = forms.IntegerField(widget=forms.HiddenInput())
+
+    def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        super(ProductBuyForm, self).__init__(*args, **kwargs)
+
     class Meta:
         model = ObjectBuyProduct
         fields = ('number_of_product',)
 
     def clean(self):
         cleaned_data = super().clean()
+        product_obj = Product.objects.get(id=cleaned_data.get('product'))
+        object_buy = cleaned_data.get('number_of_product')
+
+        if int(object_buy) > int(product_obj.product_count):
+            error_text = 'Недостаточно товара на складе'
+            self.add_error(None, error_text)
+            self.request.session['error_text'] = error_text
+            self.request.session['order_id'] = object_buy.pk
+        else:
+
+            self.object_buy = object_buy
 
 
 
@@ -59,7 +76,6 @@ class PurchaseReturnForm(forms.ModelForm):
             self.request.session['order_id'] = object_buy.pk
 
         elif abs(timezone.now() - object_buy.created_at) > datetime.timedelta(seconds=180):
-            print('Мы здесь')
             error_text = 'cannot be returned, 180 seconds have passed'
             self.add_error(None, error_text)
             self.request.session['error_text'] = error_text
