@@ -125,11 +125,16 @@ class OrderListView(LoginRequiredMixin, ListView):
         return context
 
 
-# здесь в экстраконтенте две формы или что?
-class OrderAdmin(LoginRequiredMixin, ListView):
+class OrderAdmin(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = PurchaseReturn
     template_name = 'purchase-return.html'
     login_url = 'login/'
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        return redirect('/')
 
 
 # Доделать форму без форм класс
