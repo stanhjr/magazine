@@ -29,7 +29,7 @@ class ProductBuyForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        # product_id = self.cleaned_data.get('age')
+
 
 
 class PurchaseReturnForm(forms.ModelForm):

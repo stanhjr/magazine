@@ -1,43 +1,40 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{{ request.user }}  {{ request.user.online_wallet }}
 
-<div class="login-link">
+{% if request.user.online_wallet >= 0 %}
+    {{ request.user }}  {{ request.user.online_wallet }}
+
+<div>
     <a href="{% url 'logout' %}">Logout</a>
 </div>
 
-<div class="products">
+{% else %}
+     <a href="{% url 'login' %}">Login</a>
+
+{% endif %}
+
+
+<div>
     {% for obj in object_list %}
-    <div class="product-item">
-        <div class="product-field">
-            <span class="product-field-name">Наименование</span>
-            <span class="product-field-description">{{ obj.product_name }}</span>
-        </div>
-        <div class="product-field">
-            <span class="product-field-name">Описание</span>
-            <span class="product-field-description">{{ obj.product_description }}</span>
-        </div>
-        <div class="product-field">
-            <span class="product-field-name">Количество</span>
-            <span class="product-field-description">{{ obj.product_count }}</span>
-        </div>
-        <div class="product-field">
-            <span class="product-field-name">Цена</span>
-            <span class="product-field-description">{{ obj.product_price }}</span>
-        </div>
-        <div>{{ obj.image }}</div>
-        <form method="post" action="{% url 'product-update' obj.pk %}">
+    <div>
+        Наименование {{ obj.product_name }}
+        Описание {{ obj.product_description }}
+        Количество {{ obj.product_count }}
+        Цена {{ obj.product_price }}
+        {{ obj.image }}
+        {% if request.user.online_wallet > 0 %}
+        <form method="post" action="{% url 'product-buy' %}">
             {% csrf_token %}
-            <input type="submit" value="Update">
+            {{ product_buy_form.number_of_product }}
+            <input type="hidden" name="product" value={{ obj.pk }}>
+            <input type="submit" value="Buy">
         </form>
+        {% endif %}
+
+
     </div>
     {% endfor %}
 </div>
-<form method="post" action="{% url 'product-create' %}">
-    {% csrf_token %}
-    {{ create_form }}
-    <input type="submit" value="Create">
-</form>
-{% endblock %}
 
+{% endblock %}

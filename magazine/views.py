@@ -9,25 +9,31 @@ from .forms import ProductCreateForm, SignUpForm, ProductBuyForm, PurchaseReturn
 from .models import Product, ObjectBuyProduct, PurchaseReturn
 
 
-class ProductListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+class ProductAdminListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Product
-    template_name = 'index.html'
-    login_url = 'login/'
+    template_name = 'buy-product.html'
+    login_url = '/'
     extra_context = {'create_form': ProductCreateForm()}
 
     def test_func(self):
         return self.request.user.is_superuser
 
     def handle_no_permission(self):
-        return redirect('login/')
+        return redirect('/')
 
 
-class ProductCreateView(PermissionRequiredMixin, CreateView):
+class ProductCreateView(PermissionRequiredMixin, UserPassesTestMixin, CreateView):
     permission_required = 'magazine.view_choice'
-    login_url = 'login/'
+    login_url = '/'
     http_method_names = ['post']
     form_class = ProductCreateForm
     success_url = '/'
+
+    def test_func(self):
+        return self.request.user.is_superuser
+
+    def handle_no_permission(self):
+        return redirect('login/')
 
     def form_valid(self, form):
         obj = form.save(commit=False)
@@ -38,15 +44,16 @@ class ProductCreateView(PermissionRequiredMixin, CreateView):
 
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
     model = Product
+    login_url = '/'
     fields = ('product_name', 'product_description', 'product_count', 'image')
     template_name = 'update_form.html'
     success_url = '/'
 
 
-class ProductListBuyView(LoginRequiredMixin, ListView):
+class ProductListBuyView(ListView):
     model = Product
-    template_name = 'product.html'
-    login_url = 'login/'
+    template_name = 'index.html'
+
     extra_context = {'product_buy_form': ProductBuyForm()}
 
 
@@ -54,7 +61,7 @@ class ProductBuyView(LoginRequiredMixin, CreateView):
     login_url = 'login/'
     http_method_names = ['post', ]
     form_class = ProductBuyForm
-    success_url = '/product'
+    success_url = '/'
 
     def form_valid(self, form):
         obj = form.save(commit=False)
