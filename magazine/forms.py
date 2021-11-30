@@ -1,6 +1,9 @@
+import datetime
+
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django import forms
+from django.utils import timezone
 
 from magazine.models import Product, ObjectBuyProduct, PurchaseReturn
 
@@ -48,10 +51,25 @@ class PurchaseReturnForm(forms.ModelForm):
             object_buy = None
         except ObjectBuyProduct.MultipleObjectsReturned:
             object_buy = None
+
         if object_buy and hasattr(object_buy, 'return_object'):
             error_text = 'Return already exist'
             self.add_error(None, error_text)
             self.request.session['error_text'] = error_text
             self.request.session['order_id'] = object_buy.pk
+
+        elif abs(timezone.now() - object_buy.created_at) > datetime.timedelta(seconds=180):
+            print('Мы здесь')
+            error_text = 'cannot be returned, 180 seconds have passed'
+            self.add_error(None, error_text)
+            self.request.session['error_text'] = error_text
+            self.request.session['order_id'] = object_buy.pk
+
         else:
             self.object_buy = object_buy
+
+
+class PurchaseConfirm(forms.ModelForm):
+    class Meta:
+        model = PurchaseReturn
+        fields = ()

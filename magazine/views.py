@@ -1,17 +1,11 @@
-import datetime
 import decimal
-
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponseRedirect, HttpResponse, request
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from django.utils import timezone
-from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, FormView
-
-from . import forms
-from .forms import ProductCreateForm, SignUpForm, ProductBuyForm, PurchaseReturnForm
+from .forms import ProductCreateForm, SignUpForm, ProductBuyForm, PurchaseReturnForm, PurchaseConfirm
 from .models import Product, ObjectBuyProduct, PurchaseReturn
 
 
@@ -76,7 +70,6 @@ class ProductBuyView(LoginRequiredMixin, CreateView):
         return super().form_valid(form=form)
 
 
-# Дописать валидацию отправки возврата !
 class OrderReturnCreateView(LoginRequiredMixin, CreateView):
     login_url = 'login/'
     http_method_names = ['post', ]
@@ -126,7 +119,7 @@ class OrderAdmin(LoginRequiredMixin, ListView):
 
 # Доделать форму без форм класс
 class ReturnUserDelete(LoginRequiredMixin, FormView):
-    form_class = PurchaseReturnForm
+    form_class = PurchaseConfirm
     http_method_names = ['post', ]
     success_url = '/order-admin'
 
@@ -139,7 +132,7 @@ class ReturnUserDelete(LoginRequiredMixin, FormView):
 
 # Доделать форму без форм класс
 class ReturnUserConfirm(LoginRequiredMixin, FormView):
-    form_class = PurchaseReturnForm
+    form_class = PurchaseConfirm
     http_method_names = ['post', ]
     success_url = '/order-admin'
 
