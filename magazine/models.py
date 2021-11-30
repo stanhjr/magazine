@@ -12,7 +12,7 @@ class Product(models.Model):
     product_description = models.TextField(max_length=10000, null=True)
     product_price = models.PositiveIntegerField()
     product_count = models.PositiveIntegerField()
-    image = models.ImageField(blank=True, null=True)
+    image = models.ImageField(blank=True, null=True, upload_to='users/%Y/%m/%d/')
 
     def __str__(self):
         return self.product_name

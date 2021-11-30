@@ -28,6 +28,7 @@ class ProductBuyForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super(ProductBuyForm, self).__init__(*args, **kwargs)
+        self.fields['number_of_product'].initial = 0
 
     class Meta:
         model = ObjectBuyProduct

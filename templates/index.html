@@ -2,39 +2,61 @@
 
 {% block content %}
 
-{% if request.user.online_wallet >= 0 %}
-    {{ request.user }}  {{ request.user.online_wallet }}
-
-<div>
-    <a href="{% url 'logout' %}">Logout</a>
+<div class="header">
+   <div class="header-left">
+       {% if request.user.online_wallet >= 0 %}
+        <div>{{ request.user }} <strong> {{ request.user.online_wallet }}</strong></div>
+   </div>
+   <div class="header-right">
+      <ul class="menu">
+           <li class="menu-item">
+               <a href="{% url 'order' %}" class="order-link">My orders</a>
+           </li>
+           <li class="menu-item">
+                <a href="{% url 'logout' %}">Logout</a>
+            </li>
+            {% else %}
+                 <li class="menu-item">
+                    <a href="{% url 'login' %}">Login</a>
+                 </li>
+            {% endif %}
+      </ul>
+   </div>
 </div>
-
-{% else %}
-     <a href="{% url 'login' %}">Login</a>
-
-{% endif %}
-
-
-<div>
+<h2>Products:</h2>
+<div class="products">
     {% for obj in object_list %}
-    <div>
-        Наименование {{ obj.product_name }}
-        Описание {{ obj.product_description }}
-        Количество {{ obj.product_count }}
-        Цена {{ obj.product_price }}
-        {{ obj.image }}
+    <div class="product-item">
+        <div class="product-fields">
+            <div class="product-field">
+                <span class="product-field-name">Наименование:</span>
+                <span class="product-field-description">{{ obj.product_name }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Описание:</span>
+                <span class="product-field-description">{{ obj.product_description }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Количество:</span>
+                <span class="product-field-description">{{ obj.product_count }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Цена:</span>
+                <span class="product-field-description">{{ obj.product_price }}</span>
+            </div>
+        </div>
         {% if request.user.online_wallet > 0 %}
         <form method="post" action="{% url 'product-buy' %}">
             {% csrf_token %}
-            {{ product_buy_form.number_of_product }}
+            <label>Count:</label>
+            <div class="count-input">
+                {{ product_buy_form.number_of_product }}
+            </div>
             <input type="hidden" name="product" value={{ obj.pk }}>
             <input type="submit" value="Buy">
         </form>
         {% endif %}
-
-
     </div>
     {% endfor %}
 </div>
-
 {% endblock %}
