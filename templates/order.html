@@ -1,34 +1,33 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{{ request.user }}  {{ request.user.online_wallet }}
-<div>
-    <a href="{% url 'logout' %}">Logout</a>
-</div>
-
-<div>
-    {% for obj in object_list %}
+    {{ request.user }}  {{ request.user.online_wallet }}
     <div>
-        Наименование {{ obj.product.product_name }}
-        Описание {{ obj.product.product_description }}
-        Количество {{ obj.number_of_product }}
-        Время покупки {{ obj.created_at }}
-        Цена {{ obj.product.product_price }}
-        {{ obj.image }}
-        <form method="post" action="{% url 'order-return' %}">
-            {% csrf_token %}
-            {{ order_return_form }}
-            <input type="hidden" name="order" value={{ obj.pk }}>
-            <input type="submit" value="OrderReturn">
-            {{ message }}
-        </form>
-
-
-
-
+        <a href="{% url 'logout' %}">Logout</a>
     </div>
-    {% endfor %}
-</div>
+
+    <div>
+        {% for obj in object_list %}
+            <div>
+                Наименование {{ obj.product.product_name }}
+                Описание {{ obj.product.product_description }}
+                Количество {{ obj.number_of_product }}
+                Время покупки {{ obj.created_at }}
+                Цена {{ obj.product.product_price }}
+                {{ obj.image }}
+                <form method="post" action="{% url 'order-return' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="order" value={{ obj.pk }}>
+                    <input type="submit" value="OrderReturn">
+                    {% if error_text and order_id == obj.pk %}
+                        <div style="color: red">{{ error_text }}</div>{% endif %}
+                    {{ message }}
+                </form>
+
+
+            </div>
+        {% endfor %}
+    </div>
 
 {% endblock %}
 

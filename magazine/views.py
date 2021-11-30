@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpResponseRedirect, HttpResponse, request
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views import View
 from django.views.generic import ListView, CreateView, UpdateView, FormView
@@ -84,26 +85,36 @@ class OrderReturnCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         obj = form.save(commit=False)
-        order_id = self.request.POST.get('order')
-        obj.object_buy_product = ObjectBuyProduct.objects.get(id=order_id)
-
-        d1 = obj.object_buy_product.created_at
-        d2 = timezone.now()
-
-        # if abs(d2 - d1) < datetime.timedelta(seconds=180):
-        #     print('Мы здесь')
-        #     return super().form_valid(form=form)
-
-        obj.user = self.request.user
+        obj.object_buy_product = form.object_buy
         obj.save()
         return super().form_valid(form=form)
+
+    def get_form_kwargs(self):
+        kw = super(OrderReturnCreateView, self).get_form_kwargs()
+        kw['request'] = self.request
+        return kw
+
+    def form_invalid(self, form):
+        return HttpResponseRedirect(reverse('order'))
 
 
 class OrderListView(LoginRequiredMixin, ListView):
     model = ObjectBuyProduct
     template_name = 'order.html'
     login_url = 'login/'
-    extra_context = {'order_return_form': PurchaseReturnForm()}
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super(OrderListView, self).get_context_data(**kwargs)
+        if 'error_text' in self.request.session and 'order_id' in self.request.session:
+            context.update(
+                {
+                    'error_text': self.request.session['error_text'],
+                    'order_id': self.request.session['order_id'],
+                 }
+            )
+            del self.request.session['error_text']
+            del self.request.session['order_id']
+        return context
 
 
 # здесь в экстраконтенте две формы или что?
@@ -140,7 +151,8 @@ class ReturnUserConfirm(LoginRequiredMixin, FormView):
         obj_purchase_return = PurchaseReturn.objects.get(id=purchase_id)
         object_buy_product.product.product_count += int(object_buy_product.number_of_product)
         obj.user = self.request.user
-        obj.user.online_wallet += decimal.Decimal(float(object_buy_product.product.product_price) * float(object_buy_product.number_of_product))
+        obj.user.online_wallet += decimal.Decimal(
+            float(object_buy_product.product.product_price) * float(object_buy_product.number_of_product))
         obj.user.save()
         object_buy_product.product.save()
         obj_purchase_return.delete()
