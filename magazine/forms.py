@@ -5,6 +5,8 @@ from django.forms import ModelForm
 from magazine.models import Product, ObjectBuyProduct, PurchaseReturn
 
 from .models import MyUser
+import pdb
+pdb.set_trace()
 
 
 class SignUpForm(UserCreationForm):
@@ -25,7 +27,7 @@ class ProductBuyForm(ModelForm):
         fields = ('number_of_product', )
 
     def clean(self):
-        # cleaned_data = super().clean()
+        cleaned_data = super().clean()
         # product_id = self.cleaned_data.get('age')
 
 
@@ -36,6 +38,11 @@ class PurchaseReturnForm(ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
+        obj = self.cleaned_data.get('order')
+        print(obj)
+
+
+
 
 
 

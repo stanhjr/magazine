@@ -90,9 +90,9 @@ class OrderReturnCreateView(LoginRequiredMixin, CreateView):
         d1 = obj.object_buy_product.created_at
         d2 = timezone.now()
 
-        if abs(d2 - d1) < datetime.timedelta(seconds=180):
-            return render(request, 'order.html',
-                          {'message': 'Прошло более 180 секунд, вернуть нельзя'})
+        # if abs(d2 - d1) < datetime.timedelta(seconds=180):
+        #     print('Мы здесь')
+        #     return super().form_valid(form=form)
 
         obj.user = self.request.user
         obj.save()
@@ -104,13 +104,6 @@ class OrderListView(LoginRequiredMixin, ListView):
     template_name = 'order.html'
     login_url = 'login/'
     extra_context = {'order_return_form': PurchaseReturnForm()}
-
-
-# class OrderReturnListView(LoginRequiredMixin, ListView):
-#     model = PurchaseReturn
-#     template_name = 'product.html'
-#     login_url = 'login/'
-#     extra_context = {'order_return_form': PurchaseReturnForm()}
 
 
 # здесь в экстраконтенте две формы или что?
