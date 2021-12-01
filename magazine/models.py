@@ -14,6 +14,9 @@ class Product(models.Model):
     product_count = models.PositiveIntegerField()
     image = models.ImageField(blank=True, null=True, upload_to='users/%Y/%m/%d/')
 
+    class Meta:
+        ordering = ['-id', ]
+
     def __str__(self):
         return self.product_name
 
@@ -31,5 +34,8 @@ class ObjectBuyProduct(models.Model):
 class PurchaseReturn(models.Model):
     return_at = models.DateTimeField(auto_now_add=True)
     object_buy_product = models.OneToOneField(ObjectBuyProduct, on_delete=models.DO_NOTHING, related_name='return_object')
+
+    class Meta:
+        ordering = ['-return_at', ]
 
 

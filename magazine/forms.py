@@ -1,12 +1,9 @@
 import datetime
-
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django import forms
 from django.utils import timezone
-
 from magazine.models import Product, ObjectBuyProduct, PurchaseReturn
-
 from .models import MyUser
 
 
@@ -19,7 +16,7 @@ class SignUpForm(UserCreationForm):
 class ProductCreateForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ('product_name', 'product_description', 'product_price', 'product_count', 'image')
+        fields = ('product_name', 'product_description', 'product_price', 'product_count')
 
 
 class ProductBuyForm(forms.ModelForm):
@@ -37,17 +34,13 @@ class ProductBuyForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         product_obj = Product.objects.get(id=cleaned_data.get('product'))
-        object_buy = cleaned_data.get('number_of_product')
+        count_of_buy = cleaned_data.get('number_of_product')
 
-        if int(object_buy) > int(product_obj.product_count):
-            error_text = 'Недостаточно товара на складе'
-            self.add_error(None, error_text)
-            self.request.session['error_text'] = error_text
-            self.request.session['order_id'] = object_buy.pk
-        else:
+        if int(count_of_buy) > int(product_obj.product_count):
+            raise ValidationError('Такого количества на складе нет')
 
-            self.object_buy = object_buy
-
+        if int(count_of_buy) * float(product_obj.product_price) > float(self.request.user.online_wallet):
+            raise ValidationError('В кошельке недостаточно средств')
 
 
 class PurchaseReturnForm(forms.ModelForm):
@@ -90,3 +83,6 @@ class PurchaseConfirm(forms.ModelForm):
     class Meta:
         model = PurchaseReturn
         fields = ()
+
+
+

@@ -1,9 +1,9 @@
 import decimal
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.http import HttpResponseRedirect, HttpResponse, request
-from django.shortcuts import redirect, render
-from django.urls import reverse
+from django.http import HttpResponseRedirect
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView, CreateView, UpdateView, FormView
 from .forms import ProductCreateForm, SignUpForm, ProductBuyForm, PurchaseReturnForm, PurchaseConfirm
 from .models import Product, ObjectBuyProduct, PurchaseReturn
@@ -14,6 +14,7 @@ class ProductAdminListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     template_name = 'product.html'
     login_url = '/'
     extra_context = {'create_form': ProductCreateForm()}
+    paginate_by = 5
 
     def test_func(self):
         return self.request.user.is_superuser
@@ -23,11 +24,10 @@ class ProductAdminListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 
 class ProductCreateView(PermissionRequiredMixin, UserPassesTestMixin, CreateView):
-    permission_required = 'magazine.view_choice'
     login_url = '/'
     http_method_names = ['post']
     form_class = ProductCreateForm
-    success_url = '/'
+    success_url = '/product'
 
     def test_func(self):
         return self.request.user.is_superuser
@@ -45,15 +45,16 @@ class ProductCreateView(PermissionRequiredMixin, UserPassesTestMixin, CreateView
 class ProductUpdateView(LoginRequiredMixin, UpdateView):
     model = Product
     login_url = '/'
-    fields = ('product_name', 'product_description', 'product_count', 'image')
+    http_method_names = ['post', ]
+    fields = ('product_count', )
     template_name = 'update_form.html'
-    success_url = '/'
+    success_url = '/product'
 
 
 class ProductListBuyView(ListView):
     model = Product
     template_name = 'index.html'
-
+    paginate_by = 5
     extra_context = {'product_buy_form': ProductBuyForm()}
 
 
@@ -62,6 +63,7 @@ class ProductBuyView(LoginRequiredMixin, CreateView):
     http_method_names = ['post', ]
     form_class = ProductBuyForm
     success_url = '/'
+    message = ''
 
     def form_valid(self, form):
         obj = form.save(commit=False)
@@ -82,7 +84,7 @@ class ProductBuyView(LoginRequiredMixin, CreateView):
         return kw
 
     def form_invalid(self, form):
-        return HttpResponseRedirect(reverse('/'))
+        return HttpResponseRedirect(reverse_lazy('index'))
 
 
 class OrderReturnCreateView(LoginRequiredMixin, CreateView):
@@ -109,7 +111,8 @@ class OrderReturnCreateView(LoginRequiredMixin, CreateView):
 class OrderListView(LoginRequiredMixin, ListView):
     model = ObjectBuyProduct
     template_name = 'order.html'
-    login_url = 'login/'
+    login_url = '/login'
+    paginate_by = 5
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super(OrderListView, self).get_context_data(**kwargs)
@@ -124,11 +127,16 @@ class OrderListView(LoginRequiredMixin, ListView):
             del self.request.session['order_id']
         return context
 
+    def get_queryset(self):
+        user_orders = super().get_queryset()
+        return user_orders.filter(user=self.request.user)
+
 
 class OrderAdmin(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = PurchaseReturn
     template_name = 'purchase-return.html'
     login_url = 'login/'
+    paginate_by = 5
 
     def test_func(self):
         return self.request.user.is_superuser
@@ -137,7 +145,6 @@ class OrderAdmin(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return redirect('/')
 
 
-# Доделать форму без форм класс
 class ReturnUserDelete(LoginRequiredMixin, FormView):
     form_class = PurchaseConfirm
     http_method_names = ['post', ]
@@ -150,7 +157,6 @@ class ReturnUserDelete(LoginRequiredMixin, FormView):
         return super().form_valid(form=form)
 
 
-# Доделать форму без форм класс
 class ReturnUserConfirm(LoginRequiredMixin, FormView):
     form_class = PurchaseConfirm
     http_method_names = ['post', ]
@@ -181,9 +187,11 @@ class Login(LoginView):
 class Register(CreateView):
     form_class = SignUpForm
     template_name = 'register.html'
-    success_url = '/'
+    success_url = '/login'
 
 
 class Logout(LoginRequiredMixin, LogoutView):
     next_page = '/'
     login_url = 'login/'
+
+
