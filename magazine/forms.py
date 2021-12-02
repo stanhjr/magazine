@@ -1,7 +1,10 @@
 import datetime
+
+from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.core.exceptions import ValidationError
 from django import forms
+from django.http import request
 from django.utils import timezone
 from magazine.models import Product, ObjectBuyProduct, PurchaseReturn
 from .models import MyUser
@@ -37,9 +40,11 @@ class ProductBuyForm(forms.ModelForm):
         count_of_buy = cleaned_data.get('number_of_product')
 
         if int(count_of_buy) > int(product_obj.product_count):
+            messages.warning(self.request, 'Такого количества на складе нет')
             raise ValidationError('Такого количества на складе нет')
 
         if int(count_of_buy) * float(product_obj.product_price) > float(self.request.user.online_wallet):
+            messages.warning(self.request, 'В кошельке недостаточно средств')
             raise ValidationError('В кошельке недостаточно средств')
 
 

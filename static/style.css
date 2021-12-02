@@ -129,3 +129,13 @@ textarea{
 .menu-item:not(:last-child){
     margin-right: 15px;
 }
+
+.system-massage {
+    margin: 0;
+    padding: 0;
+    color: red;
+}
+.messages{
+    margin: 0;
+    padding: 0;
+}
