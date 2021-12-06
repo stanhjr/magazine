@@ -1,37 +1,79 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{{ request.user }}  {{ request.user.online_wallet }}
-<div>
-    <a href="{% url 'logout' %}">Logout</a>
+<div class="header">
+    <div class="header-left">{{ request.user }}  <strong>{{ request.user.online_wallet }}</strong></div>
+    <div class="header-right">
+        <ul class="menu">
+            <li class="menu-item">
+                <a href="{% url 'product' %}">My products</a>
+            </li>
+            <li class="menu-item">
+                <a href="{% url 'logout' %}">Logout</a>
+            </li>
+        </ul>
+    </div>
 </div>
-
+<h2>Purchase confirm</h2>
 <div>
     {% for obj in object_list %}
-    <div>
-
-        Наименование {{ obj.object_buy_product.product.product_name }}
-        Описание {{ obj.object_buy_product.product.product_description }}
-        Количество {{ obj.object_buy_product.number_of_product }}
-        Время покупки {{ obj.object_buy_product.created_at }}
-        Цена {{ obj.object_buy_product.product.product_price }}
-        {{ obj.image }}
-
-        <form method="post" action="{% url 'order-return-confirm' %}">
-            {% csrf_token %}
-            <input type="hidden" name="return_id" value={{ obj.object_buy_product.pk }}>
-            <input type="hidden" name="purchase_id" value={{ obj.pk }}>
-            <input type="submit" value="Confirm">
-        </form>
-
-        <form method="post" action="{% url 'order-return-delete' %}">
-            {% csrf_token %}
-            <input type="hidden" name="purchase_id" value={{ obj.pk }}>
-            <input type="submit" value="Delete">
-        </form>
-    </div>
+        <div class="product-item">
+            <div class="product-fields">
+                <div class="product-field">
+                    <span class="product-field-name">Наименование:</span>
+                    <span class="product-field-description">{{ obj.object_buy_product.product.product_name }}</span>
+                </div>
+                <div class="product-field">
+                    <span class="product-field-name">Описание:</span>
+                    <span class="product-field-description">{{ obj.object_buy_product.product.product_description }}</span>
+                </div>
+                <div class="product-field">
+                    <span class="product-field-name">Количество:</span>
+                    <span class="product-field-description">{{ obj.object_buy_product.number_of_product }}</span>
+                </div>
+                <div class="product-field">
+                    <span class="product-field-name">Дата покупки:</span>
+                    <span class="product-field-description">{{ obj.object_buy_product.created_at }}</span>
+                </div>
+                <div class="product-field">
+                    <span class="product-field-name">Цена:</span>
+                    <span class="product-field-description">{{ obj.object_buy_product.product.product_price }}</span>
+                </div>
+            </div>
+            <div class="purchase-buttons">
+                <form method="post" action="{% url 'order-return-confirm' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="return_id" value={{ obj.object_buy_product.pk }}>
+                    <input type="hidden" name="purchase_id" value={{ obj.pk }}>
+                    <input type="submit" value="Confirm">
+                </form>
+                <form method="post" action="{% url 'order-return-delete' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="purchase_id" value={{ obj.pk }}>
+                    <input type="submit" value="Delete">
+                </form>
+            </div>
+        </div>
     {% endfor %}
-</div>
 
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+</div>
 {% endblock %}
 

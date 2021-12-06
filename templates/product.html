@@ -1,32 +1,75 @@
 {% extends 'base.html' %}
 
 {% block content %}
-{{ request.user }}  {{ request.user.online_wallet }}
-<div>
-    <a href="{% url 'logout' %}">Logout</a>
+<div class="header">
+    <div class="header-left">
+        <div>{{ request.user }} <strong> {{ request.user.online_wallet }}</strong></div>
+    </div>
+    <div class="header-right">
+        <ul class="menu">
+             <li class="menu-item">
+                <a href="{% url 'order-admin' %}">Purchase confirm</a>
+            </li>
+            <li class="menu-item">
+                <a href="{% url 'logout' %}">Logout</a>
+            </li>
+        </ul>
+    </div>
 </div>
-
-<div>
+<h2>My products:</h2>
+<div class="products">
     {% for obj in object_list %}
-    <div>
-        Наименование {{ obj.product_name }}
-        Описание {{ obj.product_description }}
-        Количество {{ obj.product_count }}
-        Цена {{ obj.product_price }}
-        {{ obj.image }}
-        <form method="post" action="{% url 'product-buy' %}">
+    <div class="product-item">
+        <div class="product-fields">
+            <div class="product-field">
+                <span class="product-field-name">Наименование:</span>
+                <span class="product-field-description">{{ obj.product_name }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Описание:</span>
+                <span class="product-field-description">{{ obj.product_description }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Количество:</span>
+                <span class="product-field-description">{{ obj.product_count }}</span>
+            </div>
+            <div class="product-field">
+                <span class="product-field-name">Цена:</span>
+                <span class="product-field-description">{{ obj.product_price }}</span>
+            </div>
+        </div>
+        <form method="post" action="{% url 'product-update' obj.pk %}">
             {% csrf_token %}
-            {{ product_buy_form.number_of_product }}
-            <input type="hidden" name="product" value={{ obj.pk }}>
-
-            <input type="submit" value="Buy">
-
+            <input type="submit" value="Update">
         </form>
-
-
     </div>
     {% endfor %}
 </div>
 
+    <div class="pagination">
+        <span class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ page_obj.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+
+
+<h2>Add products:</h2>
+<form method="post" action="{% url 'product-create' %}">
+    {% csrf_token %}
+    {{ create_form }}
+    <input type="submit" value="Create">
+</form>
 {% endblock %}
 
